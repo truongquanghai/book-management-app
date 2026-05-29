@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minWidth="450dp"
+    android:orientation="vertical"
+    android:padding="35dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/thong_tin_thanh_vien"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="15dp"
+        android:textColor="#163832"/>
+
+    <TextView
+        android:id="@+id/tvMaTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/ma_thanh_vien"
+        android:textSize="16sp"
+        android:layout_marginTop="10dp"
+        android:textColor="#999999"/>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+        app:boxBackgroundColor="@android:color/transparent"
+        app:hintTextColor="#163832"
+        app:placeholderTextColor="#999999">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edHoTen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/ho_ten"
+            android:textSize="18sp"
+            android:inputType="textPersonName"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:autofillHints="name" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+        app:boxBackgroundColor="@android:color/transparent"
+        app:hintTextColor="#163832">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edNamSinh"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/nam_sinh"
+            android:inputType="number"
+            android:textSize="18sp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:autofillHints="birthDateYear" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+        app:boxBackgroundColor="@android:color/transparent"
+        app:hintTextColor="#163832">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edSDT"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/so_dien_thoai"
+            android:inputType="phone"
+            android:textSize="18sp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:autofillHints="phone" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+        app:boxBackgroundColor="@android:color/transparent"
+        app:hintTextColor="#163832">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edDiaChi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/dia_chi"
+            android:textSize="18sp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:inputType="textPostalAddress"
+            android:autofillHints="postalAddress" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="35dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCancel"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:text="@string/huy"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginEnd="10dp"
+            android:textColor="#163832"
+            app:strokeColor="#163832"
+            app:strokeWidth="1.5dp"
+            app:cornerRadius="15dp"
+            app:backgroundTint="#FFFFFF"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSave"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:text="@string/luu"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginStart="10dp"
+            app:cornerRadius="15dp"
+            app:backgroundTint="#163832"
+            app:iconTint="#FFFFFF"
+            android:textColor="#FFFFFF"/>
+    </LinearLayout>
+
+</LinearLayout>

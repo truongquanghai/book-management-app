@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Bộ màu Xanh thẫm nhất quán -->
+    <color name="primaryColor">#163832</color> <!-- Xanh thẫm -->
+    <color name="primaryVariant">#051F20</color> <!-- Xanh đen cho Status Bar -->
+    <color name="secondaryColor">#235347</color> <!-- Xanh đậm -->
+    <color name="accentColor">#9DBDA7</color> <!-- Xanh rêu nhạt làm điểm nhấn -->
+
+    <color name="purple_200">#9DBDA7</color>
+    <color name="purple_500">#163832</color>
+    <color name="purple_700">#051F20</color>
+    <color name="teal_200">#9DBDA7</color>
+    <color name="teal_700">#235347</color>
+
+    <color name="black">#FF1A1A1A</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="light_gray">#F8F9FA</color>
+    <color name="subheader_color">#66163832</color> <!-- Xanh thẫm mờ 40% -->
+</resources>
