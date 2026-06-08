@@ -56,7 +56,6 @@ public class PhieuMuonDAO {
     }
 
     public List<PhieuMuon> search(String query) {
-        // Tìm theo mã phiếu mượn hoặc tên thành viên (thông qua bảng ThanhVien)
         String sql = "SELECT PhieuMuon.* FROM PhieuMuon " +
                      "INNER JOIN ThanhVien ON PhieuMuon.maTV = ThanhVien.maTV " +
                      "WHERE PhieuMuon.maPM LIKE ? OR ThanhVien.hoTen LIKE ?";
@@ -100,19 +99,14 @@ public class PhieuMuonDAO {
     }
 
     public int getDoanhThu(String tuNgay, String denNgay) {
-        // Tính tổng tiền từ những phiếu đã trả (ngayTra không trống) trong khoảng từ ngày đến ngày
-        String sqlDoanhThu = "SELECT SUM(tienThue) as doanhThu FROM PhieuMuon WHERE ngayTra BETWEEN ? AND ?";
-        List<Integer> list = new ArrayList<Integer>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery(sqlDoanhThu, new String[]{tuNgay, denNgay});
-        while (cursor.moveToNext()) {
-            try {
-                list.add(cursor.getInt(0));
-            } catch (Exception e) {
-                list.add(0);
-            }
+        String sql = "SELECT SUM(tienThue) FROM PhieuMuon WHERE ngayTra BETWEEN ? AND ?";
+        Cursor cursor = db.rawQuery(sql, new String[]{tuNgay, denNgay});
+        int doanhThu = 0;
+        if (cursor.moveToFirst()) {
+            doanhThu = cursor.getInt(0);
         }
         cursor.close();
-        return list.get(0);
+        return doanhThu;
     }
 }
