@@ -1,7 +1,5 @@
 package com.example.test2.ChangePass;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +16,8 @@ import com.example.test2.R;
 import com.example.test2.model.ThuThu;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.util.Objects;
+
 public class ChangePassFragment extends Fragment {
     TextInputEditText edPassOld, edPass, edRePass;
     Button btnSave, btnCancel;
@@ -32,27 +32,20 @@ public class ChangePassFragment extends Fragment {
         edRePass = v.findViewById(R.id.edRePass);
         btnSave = v.findViewById(R.id.btnSave);
         btnCancel = v.findViewById(R.id.btnCancel);
-        dao = new ThuThuDAO(getActivity());
+        dao = new ThuThuDAO(requireContext());
 
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                edPassOld.setText("");
-                edPass.setText("");
-                edRePass.setText("");
-            }
+        btnCancel.setOnClickListener(view -> {
+            edPassOld.setText("");
+            edPass.setText("");
+            edRePass.setText("");
         });
 
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String passOld = edPassOld.getText().toString();
-                String pass = edPass.getText().toString();
-                String rePass = edRePass.getText().toString();
-                
-                if (validate() > 0) {
-                    // Lấy user từ Intent của MainActivity
+        btnSave.setOnClickListener(view -> {
+            if (validate() > 0) {
+                // Lấy user từ Intent của MainActivity
+                if (getActivity() != null && getActivity().getIntent() != null) {
                     String user = getActivity().getIntent().getStringExtra("user");
+                    String pass = Objects.requireNonNull(edPass.getText()).toString();
                     ThuThu thuThu = dao.getID(user);
                     if (thuThu != null) {
                         thuThu.setMatKhau(pass);
@@ -74,27 +67,30 @@ public class ChangePassFragment extends Fragment {
 
     public int validate() {
         int check = 1;
-        if (edPassOld.getText().toString().isEmpty() || edPass.getText().toString().isEmpty() || edRePass.getText().toString().isEmpty()) {
+        String pOld = Objects.requireNonNull(edPassOld.getText()).toString();
+        String pNew = Objects.requireNonNull(edPass.getText()).toString();
+        String pRe = Objects.requireNonNull(edRePass.getText()).toString();
+
+        if (pOld.isEmpty() || pNew.isEmpty() || pRe.isEmpty()) {
             Toast.makeText(getContext(), "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
             check = -1;
         } else {
             // Kiểm tra mật khẩu cũ
-            String user = getActivity().getIntent().getStringExtra("user");
-            String passOld = edPassOld.getText().toString();
-            if (!dao.checkLogin(user, passOld)) {
-                Toast.makeText(getContext(), "Mật khẩu cũ không đúng", Toast.LENGTH_SHORT).show();
-                check = -1;
-            }
-            // Kiểm tra mật khẩu mới và nhập lại
-            String pass = edPass.getText().toString();
-            String rePass = edRePass.getText().toString();
-            if (!pass.equals(rePass)) {
-                Toast.makeText(getContext(), "Mật khẩu mới không khớp", Toast.LENGTH_SHORT).show();
-                check = -1;
-            }
-            if (pass.equals(passOld)) {
-                Toast.makeText(getContext(), "Mật khẩu mới không được trùng với mật khẩu cũ", Toast.LENGTH_SHORT).show();
-                check = -1;
+            if (getActivity() != null && getActivity().getIntent() != null) {
+                String user = getActivity().getIntent().getStringExtra("user");
+                if (!dao.checkLogin(user, pOld)) {
+                    Toast.makeText(getContext(), "Mật khẩu cũ không đúng", Toast.LENGTH_SHORT).show();
+                    check = -1;
+                }
+                // Kiểm tra mật khẩu mới và nhập lại
+                if (!pNew.equals(pRe)) {
+                    Toast.makeText(getContext(), "Mật khẩu mới không khớp", Toast.LENGTH_SHORT).show();
+                    check = -1;
+                }
+                if (pNew.equals(pOld)) {
+                    Toast.makeText(getContext(), "Mật khẩu mới không được trùng với mật khẩu cũ", Toast.LENGTH_SHORT).show();
+                    check = -1;
+                }
             }
         }
         return check;
