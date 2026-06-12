@@ -55,12 +55,25 @@ public class PhieuMuonDAO {
         return getData(sql);
     }
 
-    public List<PhieuMuon> search(String query) {
-        String sql = "SELECT PhieuMuon.* FROM PhieuMuon " +
-                     "INNER JOIN ThanhVien ON PhieuMuon.maTV = ThanhVien.maTV " +
-                     "WHERE PhieuMuon.maPM LIKE ? OR ThanhVien.hoTen LIKE ?";
+    public List<PhieuMuon> search(String query, int status) {
+        StringBuilder sql = new StringBuilder("SELECT PhieuMuon.* FROM PhieuMuon " +
+                "INNER JOIN ThanhVien ON PhieuMuon.maTV = ThanhVien.maTV " +
+                "WHERE (PhieuMuon.maPM LIKE ? OR ThanhVien.hoTen LIKE ?)");
+        
+        List<String> args = new ArrayList<>();
         String searchParam = "%" + query + "%";
-        return getData(sql, searchParam, searchParam);
+        args.add(searchParam);
+        args.add(searchParam);
+
+        if (status == 1) { // Trả đúng hạn
+            sql.append(" AND PhieuMuon.ngayTra IS NOT NULL AND PhieuMuon.ngayTra != '' AND PhieuMuon.ngayTra <= PhieuMuon.hanTra");
+        } else if (status == 2) { // Chưa trả
+            sql.append(" AND (PhieuMuon.ngayTra IS NULL OR PhieuMuon.ngayTra = '')");
+        } else if (status == 3) { // Trả muộn
+            sql.append(" AND PhieuMuon.ngayTra IS NOT NULL AND PhieuMuon.ngayTra != '' AND PhieuMuon.ngayTra > PhieuMuon.hanTra");
+        }
+
+        return getData(sql.toString(), args.toArray(new String[0]));
     }
 
     private List<PhieuMuon> getData(String sql, String... selectionArgs) {

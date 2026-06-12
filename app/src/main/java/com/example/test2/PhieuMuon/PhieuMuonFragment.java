@@ -19,6 +19,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.AutoCompleteTextView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,6 +54,8 @@ public class PhieuMuonFragment extends Fragment {
     FloatingActionButton fab;
     Dialog dialog;
     EditText edSearch;
+    AutoCompleteTextView acFilterStatus;
+    int selectedStatus = 0;
     TextView tvTienThue, tvMaPM, tvThanhVienLabel, tvSachLabel, tvEmpty;
     TextView tvNgayMuon, tvHanTra, tvNgayTra;
     Button btnSave, btnCancel, btnXacNhanTraSach;
@@ -76,9 +79,24 @@ public class PhieuMuonFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_phieu_muon, container, false);
         lvPhieuMuon = v.findViewById(R.id.lvPhieuMuon);
         edSearch = v.findViewById(R.id.edSearch);
+        acFilterStatus = v.findViewById(R.id.acFilterStatus);
         tvEmpty = v.findViewById(R.id.tvEmpty);
         fab = v.findViewById(R.id.fab);
         dao = new PhieuMuonDAO(getActivity());
+
+        // Setup Dropdown
+        String[] statuses = {"Tất cả", "Trả đúng hạn", "Chưa trả", "Trả muộn"};
+        android.widget.ArrayAdapter<String> statusAdapter = new android.widget.ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, statuses);
+        acFilterStatus.setAdapter(statusAdapter);
+        acFilterStatus.setText(statuses[0], false);
+
+        acFilterStatus.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                selectedStatus = position;
+                performFilter();
+            }
+        });
 
         edSearch.addTextChangedListener(new TextWatcher() {
             @Override
@@ -86,10 +104,7 @@ public class PhieuMuonFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                list.clear();
-                list.addAll(dao.search(s.toString()));
-                adapter.notifyDataSetChanged();
-                tvEmpty.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
+                performFilter();
             }
 
             @Override
@@ -108,9 +123,25 @@ public class PhieuMuonFragment extends Fragment {
     }
 
     void capNhatLv() {
-        list = (ArrayList<PhieuMuon>) dao.getAll();
-        adapter = new PhieuMuonAdapter(getActivity(), this, list);
-        lvPhieuMuon.setAdapter(adapter);
+        performFilter();
+    }
+
+    private void performFilter() {
+        String query = edSearch.getText().toString();
+        int status = selectedStatus;
+        
+        ArrayList<PhieuMuon> newList = (ArrayList<PhieuMuon>) dao.search(query, status);
+        
+        if (list == null) {
+            list = newList;
+            adapter = new PhieuMuonAdapter(getActivity(), this, list);
+            lvPhieuMuon.setAdapter(adapter);
+        } else {
+            list.clear();
+            list.addAll(newList);
+            adapter.notifyDataSetChanged();
+        }
+
         tvEmpty.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
     }
 

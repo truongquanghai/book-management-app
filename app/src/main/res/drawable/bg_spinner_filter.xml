@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Nền màu trắng, bo tròn 25dp để tạo hình viên thuốc -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/white" />
+            <corners android:radius="25dp" />
+        </shape>
+    </item>
+
+    <!-- Icon mũi tên xuống của Spinner -->
+    <item
+        android:gravity="end|center_vertical"
+        android:right="12dp">
+        <vector
+            android:width="18dp"
+            android:height="18dp"
+            android:viewportWidth="24"
+            android:viewportHeight="24"
+            android:tint="@color/primaryColor">
+            <path
+                android:fillColor="#FF000000"
+                android:pathData="M7,10l5,5l5,-5z" />
+        </vector>
+    </item>
+</layer-list>
