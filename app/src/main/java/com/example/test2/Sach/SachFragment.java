@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 import com.example.test2.Adapter.LoaiSachSpinnerAdapter;
 import androidx.appcompat.widget.ListPopupWindow;
 
@@ -44,11 +45,13 @@ public class SachFragment extends Fragment {
     SachAdapter adapter;
     FloatingActionButton fab;
     Dialog dialog;
-    EditText edTenSach, edGiaThue, edSearch;
+    EditText edTenSach, edGiaThue, edSoLuong, edSearch;
     Spinner spLoaiSach;
     Button btnSave, btnCancel;
     TextView tvLoaiSachLabel, tvMaSach, tvEmpty;
     LinearLayout layout_spLoaiSach;
+    AutoCompleteTextView acFilterStatus;
+    int selectedStatus = 0;
     LoaiSachDAO loaiSachDAO;
     int maLoaiSach;
 
@@ -58,9 +61,24 @@ public class SachFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_sach, container, false);
         lvSach = v.findViewById(R.id.lvSach);
         edSearch = v.findViewById(R.id.edSearch);
+        acFilterStatus = v.findViewById(R.id.acFilterStatus);
         tvEmpty = v.findViewById(R.id.tvEmpty);
         fab = v.findViewById(R.id.fab);
         dao = new SachDAO(getActivity());
+
+        // Setup Dropdown
+        String[] statuses = {"Tất cả", "Hết sách", "Sắp hết"};
+        android.widget.ArrayAdapter<String> statusAdapter = new android.widget.ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, statuses);
+        acFilterStatus.setAdapter(statusAdapter);
+        acFilterStatus.setText(statuses[0], false);
+
+        acFilterStatus.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                selectedStatus = position;
+                performFilter();
+            }
+        });
 
         edSearch.addTextChangedListener(new TextWatcher() {
             @Override
@@ -68,10 +86,7 @@ public class SachFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                list.clear();
-                list.addAll(dao.search(s.toString()));
-                adapter.notifyDataSetChanged();
-                tvEmpty.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
+                performFilter();
             }
 
             @Override
@@ -90,9 +105,24 @@ public class SachFragment extends Fragment {
     }
 
     void capNhatLv() {
-        list = (ArrayList<Sach>) dao.getAll();
-        adapter = new SachAdapter(getActivity(), this, list);
-        lvSach.setAdapter(adapter);
+        performFilter();
+    }
+
+    private void performFilter() {
+        String query = edSearch.getText().toString();
+        ArrayList<Sach> newList = (ArrayList<Sach>) dao.search(query, selectedStatus);
+        
+        if (list == null) {
+            list = newList;
+            adapter = new SachAdapter(getActivity(), this, list);
+            lvSach.setAdapter(adapter);
+        } else {
+            list.clear();
+            list.addAll(newList);
+            if (adapter != null) {
+                adapter.notifyDataSetChanged();
+            }
+        }
         tvEmpty.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
@@ -121,6 +151,7 @@ public class SachFragment extends Fragment {
         btnSave = dialog.findViewById(R.id.btnSave);
         tvLoaiSachLabel = dialog.findViewById(R.id.tvLoaiSachLabel);
         tvMaSach = dialog.findViewById(R.id.tvMaSach);
+        edSoLuong = dialog.findViewById(R.id.edSoLuong);
         layout_spLoaiSach = dialog.findViewById(R.id.layout_spLoaiSach);
 
         loaiSachDAO = new LoaiSachDAO(context);
@@ -148,6 +179,7 @@ public class SachFragment extends Fragment {
             tvMaSach.setText("Mã sách: " + item.getMaSach());
             edTenSach.setText(item.getTenSach());
             edGiaThue.setText(String.valueOf(item.getGiaThue()));
+            edSoLuong.setText(String.valueOf(item.getSoLuong()));
             maLoaiSach = item.getMaLoai();
             
             LoaiSach currentLoai = loaiSachDAO.getID(String.valueOf(maLoaiSach));
@@ -176,8 +208,9 @@ public class SachFragment extends Fragment {
             public void onClick(View v) {
                 String tenSach = edTenSach.getText().toString();
                 String giaThueStr = edGiaThue.getText().toString();
+                String soLuongStr = edSoLuong.getText().toString();
                 
-                if (tenSach.isEmpty() || giaThueStr.isEmpty()) {
+                if (tenSach.isEmpty() || giaThueStr.isEmpty() || soLuongStr.isEmpty()) {
                     Toast.makeText(context, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -190,6 +223,7 @@ public class SachFragment extends Fragment {
                 Sach item = (type == 0) ? new Sach() : sachObj[0];
                 item.setTenSach(tenSach);
                 item.setGiaThue(Integer.parseInt(giaThueStr));
+                item.setSoLuong(Integer.parseInt(soLuongStr));
                 item.setMaLoai(maLoaiSach);
 
                 if (type == 0) {

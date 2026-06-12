@@ -65,19 +65,17 @@ public class PhieuMuonAdapter extends ArrayAdapter<PhieuMuon> {
             Sach sach = sachDAO.getID(String.valueOf(item.getMaSach()));
             tvTenSach = v.findViewById(R.id.tvTenSach);
             if (sach != null) {
-                tvTenSach.setText("Sách: " + sach.getTenSach());
+                tvTenSach.setText("Sách: " + sach.getTenSach() + " (SL: " + item.getSoLuongMuon() + ")");
             }
 
             tvTienThue = v.findViewById(R.id.tvTienThue);
             DecimalFormat formatter = new DecimalFormat("#,###");
             String formattedTienThue = formatter.format(item.getTienThue()).replace(",", ".");
             
-            sachDAO = new SachDAO(context);
-            Sach sachGoc = sachDAO.getID(String.valueOf(item.getMaSach()));
-            if (sachGoc != null) {
-                int giaGoc = sachGoc.getGiaThue();
-                if (item.getTienThue() > giaGoc) {
-                    String formattedPhat = formatter.format(item.getTienThue() - giaGoc).replace(",", ".");
+            if (sach != null) {
+                int giaMuonChuan = sach.getGiaThue() * item.getSoLuongMuon();
+                if (item.getTienThue() > giaMuonChuan) {
+                    String formattedPhat = formatter.format(item.getTienThue() - giaMuonChuan).replace(",", ".");
                     tvTienThue.setText("Tiền thuê: " + formattedTienThue + " (Phạt: " + formattedPhat + ")");
                     tvTienThue.setTextColor(Color.RED);
                 } else {

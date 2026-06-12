@@ -40,7 +40,8 @@ public class SachSpinnerAdapter extends ArrayAdapter<Sach> {
             tvTenSach = v.findViewById(R.id.tvTenLoaiSp);
             
             tvMaSach.setText(item.getMaSach() + ". ");
-            tvTenSach.setText(item.getTenSach());
+            String displaySL = item.getSoLuong() == 0 ? "(Hết sách)" : "(SL: " + item.getSoLuong() + ")";
+            tvTenSach.setText(item.getTenSach() + " " + displaySL);
         }
         return v;
     }
@@ -58,7 +59,8 @@ public class SachSpinnerAdapter extends ArrayAdapter<Sach> {
             tvTenSach = v.findViewById(R.id.tvTenLoaiSp);
             
             tvMaSach.setText(item.getMaSach() + ". ");
-            tvTenSach.setText(item.getTenSach());
+            String displaySL = item.getSoLuong() == 0 ? "(Hết sách)" : "(SL: " + item.getSoLuong() + ")";
+            tvTenSach.setText(item.getTenSach() + " " + displaySL);
         }
         return v;
     }

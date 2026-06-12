@@ -14,7 +14,7 @@ import java.io.OutputStream;
 
 public class DbHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "PNLib";
-    private static final int DB_VERSION = 11; // Tăng lên 11 để đảm bảo database được chép lại từ assets
+    private static final int DB_VERSION = 14; // Nâng lên 14 để thêm tienPhat và ghiChu vào PhieuMuon
     private final Context mContext;
 
     public DbHelper(Context context) {
@@ -26,16 +26,8 @@ public class DbHelper extends SQLiteOpenHelper {
 
     private void checkAndCopyDatabase() {
         File dbFile = mContext.getDatabasePath(DB_NAME);
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences("DATABASE_VERSION", Context.MODE_PRIVATE);
-        int lastVersion = sharedPreferences.getInt("db_version", 0);
-
-        if (!dbFile.exists() || DB_VERSION > lastVersion) {
-            // Xóa database cũ nếu tồn tại để tránh xung đột khi ghi đè (SQLITE_READONLY_DBMOVED)
-            if (dbFile.exists()) {
-                mContext.deleteDatabase(DB_NAME);
-            }
+        if (!dbFile.exists()) {
             copyAssetsToSystem(dbFile);
-            sharedPreferences.edit().putInt("db_version", DB_VERSION).apply();
         }
     }
 
@@ -73,8 +65,30 @@ public class DbHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (newVersion > oldVersion) {
             Log.d("DbHelper", "Nâng cấp database từ " + oldVersion + " lên " + newVersion);
-            // File assets mới đã có sẵn các cột chuẩn (email, avatar), 
-            // nên không cần chạy ALTER TABLE ở đây nữa.
+            
+            // Cập nhật version 12 -> 13: Thêm soLuong vào Sach và PhieuMuon
+            if (oldVersion < 13) {
+                try {
+                    db.execSQL("ALTER TABLE Sach ADD COLUMN soLuong INTEGER DEFAULT 0");
+                } catch (Exception e) {
+                    Log.e("DbHelper", "Cột soLuong trong Sach đã tồn tại: " + e.getMessage());
+                }
+                try {
+                    db.execSQL("ALTER TABLE PhieuMuon ADD COLUMN soLuongMuon INTEGER DEFAULT 1");
+                } catch (Exception e) {
+                    Log.e("DbHelper", "Cột soLuongMuon trong PhieuMuon đã tồn tại: " + e.getMessage());
+                }
+            }
+            
+            // Cập nhật version 13 -> 14: Thêm tienPhat và ghiChu vào PhieuMuon
+            if (oldVersion < 14) {
+                try {
+                    db.execSQL("ALTER TABLE PhieuMuon ADD COLUMN tienPhat INTEGER DEFAULT 0");
+                    db.execSQL("ALTER TABLE PhieuMuon ADD COLUMN ghiChu TEXT");
+                } catch (Exception e) {
+                    Log.e("DbHelper", "Cột tienPhat/ghiChu đã tồn tại: " + e.getMessage());
+                }
+            }
         }
     }
 }

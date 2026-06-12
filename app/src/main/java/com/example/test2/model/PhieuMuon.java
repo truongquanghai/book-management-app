@@ -9,11 +9,14 @@ public class PhieuMuon {
     private String hanTra;
     private String ngayTra;
     private int tienThue;
+    private int soLuongMuon;
+    private int tienPhat;
+    private String ghiChu;
 
     public PhieuMuon() {
     }
 
-    public PhieuMuon(int maPM, String maTT, int maTV, int maSach, String ngay, String hanTra, String ngayTra, int tienThue) {
+    public PhieuMuon(int maPM, String maTT, int maTV, int maSach, String ngay, String hanTra, String ngayTra, int tienThue, int soLuongMuon, int tienPhat, String ghiChu) {
         this.maPM = maPM;
         this.maTT = maTT;
         this.maTV = maTV;
@@ -22,6 +25,25 @@ public class PhieuMuon {
         this.hanTra = hanTra;
         this.ngayTra = ngayTra;
         this.tienThue = tienThue;
+        this.soLuongMuon = soLuongMuon;
+        this.tienPhat = tienPhat;
+        this.ghiChu = ghiChu;
+    }
+
+    public int getTienPhat() {
+        return tienPhat;
+    }
+
+    public void setTienPhat(int tienPhat) {
+        this.tienPhat = tienPhat;
+    }
+
+    public String getGhiChu() {
+        return ghiChu;
+    }
+
+    public void setGhiChu(String ghiChu) {
+        this.ghiChu = ghiChu;
     }
 
     public int getMaPM() {
@@ -86,5 +108,13 @@ public class PhieuMuon {
 
     public void setTienThue(int tienThue) {
         this.tienThue = tienThue;
+    }
+
+    public int getSoLuongMuon() {
+        return soLuongMuon;
+    }
+
+    public void setSoLuongMuon(int soLuongMuon) {
+        this.soLuongMuon = soLuongMuon;
     }
 }

@@ -53,12 +53,12 @@ public class PhieuMuonFragment extends Fragment {
     PhieuMuonAdapter adapter;
     FloatingActionButton fab;
     Dialog dialog;
-    EditText edSearch;
+    EditText edSearch, edSoLuongMuon, edGhiChu;
     AutoCompleteTextView acFilterStatus;
     int selectedStatus = 0;
     TextView tvTienThue, tvMaPM, tvThanhVienLabel, tvSachLabel, tvEmpty;
     TextView tvNgayMuon, tvHanTra, tvNgayTra;
-    Button btnSave, btnCancel, btnXacNhanTraSach;
+    Button btnSave, btnCancel, btnXacNhanTraSach, btnPlus, btnMinus;
     LinearLayout layout_spTV, layout_spSach;
 
     ThanhVienDAO thanhVienDAO;
@@ -85,7 +85,7 @@ public class PhieuMuonFragment extends Fragment {
         dao = new PhieuMuonDAO(getActivity());
 
         // Setup Dropdown
-        String[] statuses = {"Tất cả", "Trả đúng hạn", "Chưa trả", "Trả muộn"};
+        String[] statuses = {"Tất cả", "Trả đúng hạn", "Chưa trả", "Trả muộn", "Quá hạn"};
         android.widget.ArrayAdapter<String> statusAdapter = new android.widget.ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, statuses);
         acFilterStatus.setAdapter(statusAdapter);
         acFilterStatus.setText(statuses[0], false);
@@ -156,10 +156,14 @@ public class PhieuMuonFragment extends Fragment {
         btnCancel = dialog.findViewById(R.id.btnCancel);
         btnSave = dialog.findViewById(R.id.btnSave);
         btnXacNhanTraSach = dialog.findViewById(R.id.btnXacNhanTraSach);
+        btnPlus = dialog.findViewById(R.id.btnPlus);
+        btnMinus = dialog.findViewById(R.id.btnMinus);
         tvThanhVienLabel = dialog.findViewById(R.id.tvThanhVienLabel);
         tvSachLabel = dialog.findViewById(R.id.tvSachLabel);
         layout_spTV = dialog.findViewById(R.id.layout_spThanhVien);
         layout_spSach = dialog.findViewById(R.id.layout_spSach);
+        edSoLuongMuon = dialog.findViewById(R.id.edSoLuongMuon);
+        edGhiChu = dialog.findViewById(R.id.edGhiChu);
 
         // Xử lý Thành viên
         thanhVienDAO = new ThanhVienDAO(context);
@@ -200,16 +204,56 @@ public class PhieuMuonFragment extends Fragment {
                 Sach s = listSach.get(position);
                 maSach = s.getMaSach();
                 tienThue = s.getGiaThue();
-                tvTienThue.setText("Tiền thuê: " + tienThue);
+                
+                // Cập nhật hiển thị tiền thuê dựa trên số lượng hiện tại
+                updateTienThueDisplay();
+                
                 tvSachLabel.setText("Sách: " + s.getTenSach());
                 popupSach.dismiss();
             }
+        });
+
+        edSoLuongMuon.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                updateTienThueDisplay();
+            }
+            @Override
+            public void afterTextChanged(Editable s) {}
         });
 
         layout_spSach.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 popupSach.show();
+            }
+        });
+
+        btnPlus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int sl = 1;
+                try {
+                    sl = Integer.parseInt(edSoLuongMuon.getText().toString());
+                } catch (Exception e) {}
+                sl++;
+                edSoLuongMuon.setText(String.valueOf(sl));
+            }
+        });
+
+        btnMinus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int sl = 1;
+                try {
+                    sl = Integer.parseInt(edSoLuongMuon.getText().toString());
+                } catch (Exception e) {}
+                if (sl > 1) {
+                    sl--;
+                    edSoLuongMuon.setText(String.valueOf(sl));
+                }
             }
         });
 
@@ -245,12 +289,23 @@ public class PhieuMuonFragment extends Fragment {
             tvHanTra.setText(hanTra);
             
             tvNgayTra.setText("Chưa trả");
+            edSoLuongMuon.setText("1");
+            btnPlus.setVisibility(View.VISIBLE);
+            btnMinus.setVisibility(View.VISIBLE);
+            edSoLuongMuon.setEnabled(true);
+            edGhiChu.setText("");
             btnXacNhanTraSach.setVisibility(View.GONE);
             btnSave.setVisibility(View.VISIBLE); // Hiện nút Lưu khi thêm mới
         } else { // Xem chi tiết
             final PhieuMuon item = obj[0];
             tvMaPM.setVisibility(View.VISIBLE);
             tvMaPM.setText("Mã phiếu mượn: " + item.getMaPM());
+            edSoLuongMuon.setText(String.valueOf(item.getSoLuongMuon()));
+            edSoLuongMuon.setEnabled(false); // Không cho sửa số lượng khi xem chi tiết
+            btnPlus.setVisibility(View.GONE);
+            btnMinus.setVisibility(View.GONE);
+            
+            edGhiChu.setText(item.getGhiChu());
             
             maThanhVien = item.getMaTV();
             ThanhVien tv = thanhVienDAO.getID(String.valueOf(maThanhVien));
@@ -260,12 +315,12 @@ public class PhieuMuonFragment extends Fragment {
             Sach s = sachDAO.getID(String.valueOf(maSach));
             if (s != null) {
                 tvSachLabel.setText("Sách: " + s.getTenSach());
-                int giaGoc = s.getGiaThue();
-                if (item.getTienThue() > giaGoc) {
-                    tvTienThue.setText("Tiền thuê: " + item.getTienThue() + " (Gồm " + (item.getTienThue() - giaGoc) + " phí phạt)");
+                int giaGoc = s.getGiaThue() * item.getSoLuongMuon();
+                if (item.getTienPhat() > 0) {
+                    tvTienThue.setText("Tổng tiền: " + item.getTienThue() + " (Phạt: " + item.getTienPhat() + ")");
                     tvTienThue.setTextColor(Color.RED);
                 } else {
-                    tvTienThue.setText("Tiền thuê: " + item.getTienThue());
+                    tvTienThue.setText("Tổng tiền: " + item.getTienThue());
                     tvTienThue.setTextColor(Color.BLACK);
                 }
             }
@@ -273,11 +328,14 @@ public class PhieuMuonFragment extends Fragment {
             tvNgayMuon.setText(item.getNgay());
             tvHanTra.setText(item.getHanTra());
             
-            btnSave.setVisibility(View.GONE); // Ẩn nút Cập nhật
+            btnSave.setVisibility(View.VISIBLE); // Cho phép cập nhật ghi chú
+            btnSave.setText("Cập nhật ghi chú");
 
             if (item.getNgayTra() != null && !item.getNgayTra().isEmpty()) {
                 tvNgayTra.setText(item.getNgayTra());
                 btnXacNhanTraSach.setVisibility(View.GONE);
+                edGhiChu.setEnabled(false);
+                btnSave.setVisibility(View.GONE);
             } else {
                 tvNgayTra.setText("Chưa trả");
                 btnXacNhanTraSach.setVisibility(View.VISIBLE);
@@ -286,31 +344,32 @@ public class PhieuMuonFragment extends Fragment {
             btnXacNhanTraSach.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // Nếu người dùng chưa chọn ngày trả thủ công, lấy ngày hiện tại
-                    String ngayTra = tvNgayTra.getText().toString();
-                    if (ngayTra.equals("Chưa trả")) {
-                        ngayTra = sdf.format(new Date());
-                    }
-
+                    // Lấy ngày hiện tại làm ngày trả
+                    String ngayTra = sdf.format(new Date());
                     item.setNgayTra(ngayTra);
                     
-                    // Lấy hạn trả từ TextView để đảm bảo tính đúng nếu vừa chỉnh sửa trên UI
-                    String hanTraStr = tvHanTra.getText().toString();
-                    item.setHanTra(hanTraStr);
-
                     try {
-                        Date dHanTra = sdf.parse(hanTraStr);
+                        Date dHanTra = sdf.parse(item.getHanTra());
                         Date dNgayTra = sdf.parse(ngayTra);
-                        if (dNgayTra.after(dHanTra)) {
+                        
+                        // Nếu ngày trả sau hạn trả -> Phạt 5000đ
+                        if (dNgayTra != null && dHanTra != null && dNgayTra.after(dHanTra)) {
                             int phuPhi = 5000;
+                            item.setTienPhat(phuPhi);
                             item.setTienThue(item.getTienThue() + phuPhi);
-                            Toast.makeText(context, "Quá hạn! Đã cộng thêm phí phạt 5.000 VNĐ", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Trả muộn! Đã cộng phí phạt 5.000 VNĐ", Toast.LENGTH_LONG).show();
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
 
                     if (dao.update(item) > 0) {
+                        // Hoàn kho: Cộng lại số lượng sách đã mượn vào kho
+                        Sach s = sachDAO.getID(String.valueOf(item.getMaSach()));
+                        if (s != null) {
+                            s.setSoLuong(s.getSoLuong() + item.getSoLuongMuon());
+                            sachDAO.update(s);
+                        }
                         Toast.makeText(context, "Xác nhận trả sách thành công", Toast.LENGTH_SHORT).show();
                         capNhatLv();
                         dialog.dismiss();
@@ -329,8 +388,17 @@ public class PhieuMuonFragment extends Fragment {
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (maThanhVien == 0 || maSach == 0) {
+                String sSoLuong = edSoLuongMuon.getText().toString();
+                String ghiChu = edGhiChu.getText().toString();
+                
+                if (maThanhVien == 0 || maSach == 0 || sSoLuong.isEmpty()) {
                     Toast.makeText(context, "Vui lòng chọn đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                
+                int soLuongMuon = Integer.parseInt(sSoLuong);
+                if (soLuongMuon <= 0) {
+                    Toast.makeText(context, "Số lượng mượn phải lớn hơn 0", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 
@@ -339,7 +407,18 @@ public class PhieuMuonFragment extends Fragment {
                 item.setMaTT(user != null ? user : "admin");
                 item.setMaTV(maThanhVien);
                 item.setMaSach(maSach);
-                item.setTienThue(tienThue);
+                item.setSoLuongMuon(soLuongMuon);
+                item.setGhiChu(ghiChu);
+
+                if (type == 0) {
+                    item.setTienThue(tienThue * soLuongMuon); // Tiền thuê = giá * số lượng
+                    item.setTienPhat(0);
+                }
+                // Nếu là edit (type != 0), chúng ta giữ nguyên tiền thuế đã tính trước đó (có thể bao gồm phạt)
+                // Hoặc nếu muốn cập nhật lại tiền thuê gốc nếu chưa trả:
+                else if (item.getNgayTra() == null || item.getNgayTra().isEmpty()) {
+                     item.setTienThue(tienThue * soLuongMuon);
+                }
 
                 String ngayMuon = tvNgayMuon.getText().toString();
                 String hanTra = tvHanTra.getText().toString();
@@ -359,10 +438,21 @@ public class PhieuMuonFragment extends Fragment {
                 item.setHanTra(hanTra);
 
                 if (type == 0) {
-                    item.setNgayTra(""); // Chưa trả
+                    item.setNgayTra(""); // Trạng thái chưa trả
+
+                    // Kiểm tra kho trước khi cho mượn
+                    Sach currentSach = sachDAO.getID(String.valueOf(maSach));
+                    if (currentSach == null || currentSach.getSoLuong() < soLuongMuon) {
+                        Toast.makeText(context, "Không đủ sách trong kho! Hiện có: " + (currentSach != null ? currentSach.getSoLuong() : 0), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
                     if (dao.insert(item) > 0) {
-                        Toast.makeText(context, "Thêm thành công", Toast.LENGTH_SHORT).show();
+                        // Trừ số lượng sách trong kho
+                        currentSach.setSoLuong(currentSach.getSoLuong() - soLuongMuon);
+                        sachDAO.update(currentSach);
+                        
+                        Toast.makeText(context, "Thêm phiếu mượn thành công", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(context, "Thêm thất bại", Toast.LENGTH_SHORT).show();
                     }
@@ -387,6 +477,16 @@ public class PhieuMuonFragment extends Fragment {
         builder.setPositiveButton("Có", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                // Lấy thông tin phiếu mượn trước khi xóa để hoàn kho
+                PhieuMuon pm = dao.getID(Id);
+                if (pm != null && (pm.getNgayTra() == null || pm.getNgayTra().isEmpty())) {
+                    // Nếu phiếu chưa trả mà bị xóa, hoàn lại số lượng sách vào kho
+                    Sach s = sachDAO.getID(String.valueOf(pm.getMaSach()));
+                    if (s != null) {
+                        s.setSoLuong(s.getSoLuong() + pm.getSoLuongMuon());
+                        sachDAO.update(s);
+                    }
+                }
                 dao.delete(Id);
                 capNhatLv();
             }
@@ -440,5 +540,20 @@ public class PhieuMuonFragment extends Fragment {
                 calendar.get(Calendar.DAY_OF_MONTH)
         );
         datePickerDialog.show();
+    }
+
+    private void updateTienThueDisplay() {
+        if (maSach != 0) {
+            String sSoLuong = edSoLuongMuon.getText().toString();
+            int sl = 1;
+            if (!sSoLuong.isEmpty()) {
+                try {
+                    sl = Integer.parseInt(sSoLuong);
+                } catch (NumberFormatException e) {
+                    sl = 1;
+                }
+            }
+            tvTienThue.setText("Tiền thuê: " + (tienThue * sl));
+        }
     }
 }

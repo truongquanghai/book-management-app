@@ -23,12 +23,14 @@
 
             <TextView
                 android:id="@+id/tvTenSach"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Tên sách"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="@color/primaryColor"/>
+                android:textColor="@color/primaryColor"
+                android:maxLines="2"
+                android:ellipsize="end"/>
 
             <TextView
                 android:id="@+id/tvMaSach"
@@ -39,26 +41,37 @@
                 android:textSize="13sp"
                 android:textColor="#888888"/>
 
+            <TextView
+                android:id="@+id/tvLoai"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Loại sách: Công nghệ thông tin"
+                android:textSize="14sp"
+                android:textColor="#555555"
+                android:singleLine="false"/>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="4dp">
+                android:layout_marginTop="6dp">
 
                 <TextView
                     android:id="@+id/tvGiaThue"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Giá thuê: 2000"
+                    android:layout_weight="1"
+                    android:text="Giá thuê: 20.000"
                     android:textSize="14sp"
-                    android:textColor="#555555"
-                    android:layout_marginEnd="15dp"/>
+                    android:textColor="#E53935"
+                    android:textStyle="bold"/>
 
                 <TextView
-                    android:id="@+id/tvLoai"
+                    android:id="@+id/tvSoLuong"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Loại: Kinh tế"
+                    android:text="Số lượng: 10"
                     android:textSize="14sp"
                     android:textColor="#555555"/>
             </LinearLayout>
