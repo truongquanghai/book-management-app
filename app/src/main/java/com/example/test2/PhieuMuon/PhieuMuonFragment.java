@@ -300,8 +300,18 @@ public class PhieuMuonFragment extends Fragment {
             final PhieuMuon item = obj[0];
             tvMaPM.setVisibility(View.VISIBLE);
             tvMaPM.setText("Mã phiếu mượn: " + item.getMaPM());
+
+            // QUAN TRỌNG: Phải gán maSach và tienThue TRƯỚC khi setText cho edSoLuongMuon
+            // để tránh TextWatcher tính toán sai tiền thuê về 0
+            maSach = item.getMaSach();
+            Sach s = sachDAO.getID(String.valueOf(maSach));
+            if (s != null) {
+                tienThue = s.getGiaThue(); 
+                tvSachLabel.setText("Sách: " + s.getTenSach());
+            }
+
             edSoLuongMuon.setText(String.valueOf(item.getSoLuongMuon()));
-            edSoLuongMuon.setEnabled(false); // Không cho sửa số lượng khi xem chi tiết
+            edSoLuongMuon.setEnabled(false);
             btnPlus.setVisibility(View.GONE);
             btnMinus.setVisibility(View.GONE);
             
@@ -310,12 +320,8 @@ public class PhieuMuonFragment extends Fragment {
             maThanhVien = item.getMaTV();
             ThanhVien tv = thanhVienDAO.getID(String.valueOf(maThanhVien));
             if (tv != null) tvThanhVienLabel.setText("Thành viên: " + tv.getHoTen());
-            
-            maSach = item.getMaSach();
-            Sach s = sachDAO.getID(String.valueOf(maSach));
+
             if (s != null) {
-                tvSachLabel.setText("Sách: " + s.getTenSach());
-                int giaGoc = s.getGiaThue() * item.getSoLuongMuon();
                 if (item.getTienPhat() > 0) {
                     tvTienThue.setText("Tổng tiền: " + item.getTienThue() + " (Phạt: " + item.getTienPhat() + ")");
                     tvTienThue.setTextColor(Color.RED);
@@ -414,11 +420,7 @@ public class PhieuMuonFragment extends Fragment {
                     item.setTienThue(tienThue * soLuongMuon); // Tiền thuê = giá * số lượng
                     item.setTienPhat(0);
                 }
-                // Nếu là edit (type != 0), chúng ta giữ nguyên tiền thuế đã tính trước đó (có thể bao gồm phạt)
-                // Hoặc nếu muốn cập nhật lại tiền thuê gốc nếu chưa trả:
-                else if (item.getNgayTra() == null || item.getNgayTra().isEmpty()) {
-                     item.setTienThue(tienThue * soLuongMuon);
-                }
+                // Khi cập nhật ghi chú (type != 0), KHÔNG gán lại tiền thuê để giữ nguyên số tiền hiện tại (có thể bao gồm phạt)
 
                 String ngayMuon = tvNgayMuon.getText().toString();
                 String hanTra = tvHanTra.getText().toString();
